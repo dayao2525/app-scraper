@@ -129,8 +129,8 @@ export async function run() {
           category: cateVal,
           country: String(country[i].value).toLocaleLowerCase(),
         });
-        // 每一分钟抓一次
-        await sleep(60000)
+        // 每二十秒抓一次
+        await sleep(20000)
       }
     }
   }

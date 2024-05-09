@@ -29,9 +29,10 @@ export async function saveOrUpdate(item, type) {
     // 这里需要传入表名字
     const repository = AppDataSource.getRepository("app")
 
-    // 同一个国家的app才是唯一
+    // 同一个国家相同类型的app才是唯一
     let entiry = await repository.findOneBy({
         appId: item.appId,
+        type,
         country: item.__country
     })
     let isUpdate = true;
