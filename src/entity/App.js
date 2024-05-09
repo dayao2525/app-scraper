@@ -12,7 +12,7 @@ export const AppEntity = new EntitySchema({
       generated: true,
     },
     storeId: {
-      type: "int",
+      type: "bigint",
       default: 0,
     },
     type: {
