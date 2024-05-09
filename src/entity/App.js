@@ -13,6 +13,7 @@ export const AppEntity = new EntitySchema({
     },
     storeId: {
       type: "bigint",
+      comment: "appstore id, gooleplay没有该字段",
       default: 0,
     },
     type: {
@@ -24,19 +25,16 @@ export const AppEntity = new EntitySchema({
       default: "",
     },
     title: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     description: {
       type: "text",
     },
     icon: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     url: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     score: {
       type: "float",
@@ -51,8 +49,7 @@ export const AppEntity = new EntitySchema({
       default: true,
     },
     currency: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     genre: {
       type: "text",
@@ -61,24 +58,21 @@ export const AppEntity = new EntitySchema({
       type: "text",
     },
     released: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     updated: {
       type: "bigint",
       default: 0,
     },
     version: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     reviews: {
-      type: "int",
+      type: "bigint",
       default: 0,
     },
     contentRating: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     size: {
       type: "float",
@@ -88,8 +82,7 @@ export const AppEntity = new EntitySchema({
       type: "text",
     },
     requiredOsVersion: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     screenshots: {
       type: "text",
@@ -101,27 +94,22 @@ export const AppEntity = new EntitySchema({
       type: "text",
     },
     developerId: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     developer: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     developerWebsite: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     country: {
       type: "text",
     },
     collection: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     category: {
-      type: "varchar",
-      default: "",
+      type: "text",
     },
     raw: {
       type: "text",
