@@ -55,11 +55,11 @@ export const AppEntity = new EntitySchema({
       default: "",
     },
     genre: {
-      type: "varchar",
+      type: "text",
       default: "",
     },
     genreId: {
-      type: "varchar",
+      type: "text",
       default: "",
     },
     released: {
@@ -100,7 +100,7 @@ export const AppEntity = new EntitySchema({
       type: "text",
     },
     supportedDevices: {
-      type: "varchar",
+      type: "text",
       default: "",
     },
     developerId: {
@@ -116,7 +116,7 @@ export const AppEntity = new EntitySchema({
       default: "",
     },
     country: {
-      type: "varchar",
+      type: "text",
       default: "",
     },
     collection: {
