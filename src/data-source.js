@@ -47,8 +47,8 @@ export async function saveOrUpdate(item, type) {
     entiry.description = item.description || ''
     entiry.icon = item.icon || ''
     entiry.url = item.url || ''
-    entiry.score = item.score ?? 0
-    entiry.price = item.price ?? 0
+    entiry.score = String(item.score ?? '')
+    entiry.price = String(item.price ?? '')
     entiry.free = item.free
     entiry.currency = item.currency || ''
     entiry.version = item.version || ''
@@ -70,7 +70,7 @@ export async function saveOrUpdate(item, type) {
         entiry.genreId = item.genreIds.join(',')
         entiry.ipadScreenshots = item.ipadScreenshots.join(',')
         entiry.languages = item.languages.join(',')
-        entiry.size = item.size
+        entiry.size = String(item.size ?? '');
         entiry.updated = new Date(item.updated).getTime()
         entiry.requiredOsVersion = item.requiredOsVersion || ''
         entiry.supportedDevices = item.supportedDevices.join(',')
@@ -80,7 +80,7 @@ export async function saveOrUpdate(item, type) {
         entiry.requiredOsVersion = item.androidVersion || ''
         entiry.updated = item.updated
         entiry.supportedDevices = ''
-        entiry.size = 0
+        entiry.size = ''
         entiry.languages = ''
         entiry.ipadScreenshots = ''
         entiry.storeId = 0

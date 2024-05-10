@@ -37,12 +37,10 @@ export const AppEntity = new EntitySchema({
       type: "text",
     },
     score: {
-      type: "float",
-      default: 0,
+      type: "text",
     },
     price: {
-      type: "float",
-      default: 0,
+      type: "text",
     },
     free: {
       type: "bool",
@@ -75,8 +73,7 @@ export const AppEntity = new EntitySchema({
       type: "text",
     },
     size: {
-      type: "float",
-      default: 0,
+      type: "text",
     },
     languages: {
       type: "text",
