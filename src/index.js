@@ -9,9 +9,9 @@ import { run as runIos } from "./script/ios.js";
 AppDataSource.initialize()
   .then(async () => {
     // here you can start to work with your database
-    console.time();
-    await Promise.all([runIos(), runAndroid()]);
-    console.timeEnd();
+    console.time('all');
+    await Promise.allSettled([runIos(), runAndroid()]);
+    console.timeEnd('all');
   })
   .catch((error) => console.log(error))
   .finally(() => {

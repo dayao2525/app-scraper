@@ -49,6 +49,7 @@ export async function run() {
         country,
         fullDetail: true,
         num: 200,
+        throttle: 10,
       });
 
       if (rs && rs.length) {
@@ -73,6 +74,7 @@ export async function run() {
     }
   }
 
+  console.time('ios');
   // 按国家采集
   for (let i = 0, len = country.length; i < len; i++) {
     for (let [_key, cateVal] of Object.entries(category)) {
@@ -82,9 +84,11 @@ export async function run() {
           category: cateVal,
           country: String(country[i].value).toLocaleLowerCase(),
         });
-        // 每二十秒抓一次
-        await sleep(20000);
+        // // 每二十秒抓一次
+        // await sleep(5000);
       }
     }
   }
+  console.timeEnd('ios');
+  conosle.log('ios done')
 }
