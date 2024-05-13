@@ -1,10 +1,4 @@
 import gplay from "google-play-scraper";
-import Log from "../utils/Log.js";
-import { sleep, createDir } from "../utils/index.js";
-import { saveOrUpdate } from "../data-source.js";
-import { osTypeEnum, country } from "../const.js";
-import fs from "fs/promises";
-import { resolve } from "path";
 
 // const category = {
 //     APPLICATION: 'APPLICATION',
@@ -63,79 +57,29 @@ import { resolve } from "path";
 //     FAMILY: 'FAMILY'
 //   }
 
-const category = gplay.category;
-const collection = gplay.collection;
+export const category = gplay.category;
+export const collection = gplay.collection;
 
-export async function run() {
-  const DATA_PATH = resolve(`./data/android/${Date.now()}`);
-  await createDir(DATA_PATH);
 
-  async function saveFetchData(filename, data) {
-    const file = resolve(DATA_PATH, filename);
-    return fs.writeFile(file, data, "utf-8").catch(console.error);
-  }
+/**
+ * 采集分类app
+ * @param options IFnListOptions
+ */
+export async function scraper(options) {
+  const {
+    collection = gplay.collection.TOP_FREE,
+    category,
+    country = "us",
+  } = options ?? {};
 
-  /**
-   * 采集分类app
-   * @param options IFnListOptions
-   */
-  async function scraper(options) {
-    const {
-      collection = gplay.collection.TOP_FREE,
-      category,
-      country = "us",
-    } = options ?? {};
-
-    Log.info(
-      `开始采集google play, collection: ${collection}, category: ${category}, country: ${country}`
-    );
-    try {
-      const rs = await gplay.list({
-        collection,
-        category,
-        country,
-        fullDetail: true,
-        throttle: 10,
-        num: 500,
-      });
-
-      if (rs && rs.length) {
-        await saveFetchData(
-          `${country}-${category}-${collection}.json`,
-          JSON.stringify(rs, null, 4)
-        );
-        for (let i = 0, len = rs.length; i < len; i++) {
-          // 扩展国家字段，用于入库
-          rs[i].__country = country;
-          rs[i].__collection = collection;
-          rs[i].__category = category;
-          await saveOrUpdate(rs[i], osTypeEnum.android);
-        }
-      }
-      Log.info(`采集完成，已采集${rs.length}条数据`);
-    } catch (e) {
-      await saveFetchData(
-        `error-${country}-${category}-${collection}.log`,
-        e.stack ?? e.message
-      );
-    }
-  }
-
-  console.time('android');
-  // 按国家采集
-  for (let i = 0, len = country.length; i < len; i++) {
-    for (let [_key, cateVal] of Object.entries(category)) {
-      for (let [_colKey, colVal] of Object.entries(collection)) {
-        await scraper({
-          collection: colVal,
-          category: cateVal,
-          country: String(country[i].value).toLocaleLowerCase(),
-        });
-        // // 每二十秒抓一次
-        // await sleep(5000)
-      }
-    }
-  }
-  console.timeEnd('android');
-  conosle.log('android done')
+  return await gplay.list({
+    collection,
+    category,
+    country,
+    fullDetail: true,
+    throttle: 10,
+    num: 500,
+  });
 }
+
+
