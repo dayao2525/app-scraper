@@ -14,5 +14,5 @@ AppDataSource.initialize()
   })
   .catch((error) => console.log(error))
   .finally(() => {
-    process.exit(0);
+    AppDataSource.destroy();
   });
