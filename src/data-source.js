@@ -1,4 +1,4 @@
-import { DataSource } from "typeorm"
+import { DataSource, getConnection } from "typeorm"
 import "reflect-metadata"
 import { AppEntity } from "./entity/App.js"
 import { CollectionEntity } from "./entity/Collection.js"
@@ -25,80 +25,102 @@ export const AppDataSource = new DataSource({
     migrations: [],
 })
 
-export async function saveOrUpdate(item, type) {
+export async function saveOrUpdate(items, type, country) {
     // 这里需要传入表名字
     const repository = AppDataSource.getRepository("app")
 
-    // 同一个国家相同类型的app才是唯一
-    let entiry = await repository.findOneBy({
-        appId: item.appId,
-        type,
-        country: item.__country
-    })
-    let isUpdate = true;
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect();
+    // 开始事务：
+    await queryRunner.startTransaction();
 
-    if(!entiry) {
-        isUpdate = false;
-        entiry = {}
-    }
-    entiry.type = type
-    entiry.appId = item.appId
-    entiry.title = item.title || ''
-    entiry.description = item.description || ''
-    entiry.icon = item.icon || ''
-    entiry.url = item.url || ''
-    entiry.score = String(item.score ?? '')
-    entiry.price = String(item.price ?? '')
-    entiry.free = item.free
-    entiry.currency = item.currency || ''
-    entiry.version = item.version || ''
-    entiry.contentRating = item.contentRating || ''
-    entiry.screenshots = item.screenshots.join(',')
-    entiry.developerWebsite = item.developerWebsite || ''
-    entiry.developerId = item.developerId || ''
-    entiry.developer = item.developer || ''
-    entiry.reviews = item.reviews ?? 0
-    entiry.released = item.released ?? ''
-    entiry.country = item.__country
-    entiry.collection = item.__collection
-    entiry.category = item.__category
-    entiry.raw = JSON.stringify(item)
+    const saves = [];
+    const ids = items.map(item => item.appId)
+    const updates = await repository.createQueryBuilder("app", queryRunner)
+        .select(["id", "appId"])
+        .where("appId IN (:...ids)", { ids })
+        .andWhere("type = :type", { type })
+        .andWhere("country = :country", { country })
+        .getRawMany()
 
-    if (type === osTypeEnum.ios) {
-        entiry.storeId = item.id;
-        entiry.genre = (item.genres ?? []).join(',')
-        entiry.genreId = (item.genreIds ?? []).join(',')
-        entiry.ipadScreenshots = (item.ipadScreenshots??[]).join(',')
-        entiry.languages = (item.languages ?? []).join(',')
-        entiry.size = String(item.size ?? '');
-        entiry.updated = new Date(item.updated).getTime()
-        entiry.requiredOsVersion = item.requiredOsVersion || ''
-        entiry.supportedDevices = (item.supportedDevices ?? []).join(',')
-    } else {
-        entiry.genre = [item.genre].join(',')
-        entiry.genreId = [item.genreId].join(',')
-        entiry.requiredOsVersion = item.androidVersion || ''
-        entiry.updated = item.updated
-        entiry.supportedDevices = ''
-        entiry.size = ''
-        entiry.languages = ''
-        entiry.ipadScreenshots = ''
-        entiry.storeId = 0
+    for (let i = 0, len = items.length; i < len; i++) {
+        const item = items[i]
+        let entiry = updates.find(u => u.appId === item.appId)
+
+        if (!entiry) {
+            entiry = {}
+        }
+
+        entiry.type = type
+        entiry.appId = item.appId
+        entiry.title = item.title || ''
+        entiry.description = item.description || ''
+        entiry.icon = item.icon || ''
+        entiry.url = item.url || ''
+        entiry.score = String(item.score ?? '')
+        entiry.price = String(item.price ?? '')
+        entiry.free = item.free
+        entiry.currency = item.currency || ''
+        entiry.version = item.version || ''
+        entiry.contentRating = item.contentRating || ''
+        entiry.screenshots = item.screenshots.join(',')
+        entiry.developerWebsite = item.developerWebsite || ''
+        entiry.developerId = item.developerId || ''
+        entiry.developer = item.developer || ''
+        entiry.reviews = item.reviews ?? 0
+        entiry.released = item.released ?? ''
+        entiry.country = item.__country
+        entiry.collection = item.__collection
+        entiry.category = item.__category
+        entiry.raw = JSON.stringify(item)
+
+        if (type === osTypeEnum.ios) {
+            entiry.storeId = item.id;
+            entiry.genre = (item.genres ?? []).join(',')
+            entiry.genreId = (item.genreIds ?? []).join(',')
+            entiry.ipadScreenshots = (item.ipadScreenshots ?? []).join(',')
+            entiry.languages = (item.languages ?? []).join(',')
+            entiry.size = String(item.size ?? '');
+            entiry.updated = new Date(item.updated).getTime()
+            entiry.requiredOsVersion = item.requiredOsVersion || ''
+            entiry.supportedDevices = (item.supportedDevices ?? []).join(',')
+        } else {
+            entiry.genre = [item.genre].join(',')
+            entiry.genreId = [item.genreId].join(',')
+            entiry.requiredOsVersion = item.androidVersion || ''
+            entiry.updated = item.updated
+            entiry.supportedDevices = ''
+            entiry.size = ''
+            entiry.languages = ''
+            entiry.ipadScreenshots = ''
+            entiry.storeId = 0
+        }
+        saves.push(entiry);
     }
-    await repository.save(entiry)
+
+    try {
+        await queryRunner.manager.save(saves)
+        // 提交事务：
+        await queryRunner.commitTransaction();
+    } catch (err) {
+        // 有错误做出回滚更改
+        await queryRunner.rollbackTransaction();
+    } finally {
+        // you need to release query runner which is manually created:
+        await queryRunner.release()
+    }
 }
 
 export async function saveOrUpdateCollection(type, collection, ids) {
-    console.log(type,collection, ids.length )
-  // 这里需要传入表名字
-  const repository = AppDataSource.getRepository("collection")
+    // 这里需要传入表名字
+    const repository = AppDataSource.getRepository("collection")
 
-  let entiry = await repository.findOneBy({
+    let entiry = await repository.findOneBy({
         type,
         collection
     })
 
-    if(!entiry) {
+    if (!entiry) {
         entiry = {}
         entiry.type = type
         entiry.collection = collection

@@ -47,8 +47,8 @@ export async function run(type, isOnlyNew = false) {
                     rs[i].__country = country;
                     rs[i].__collection = collection;
                     rs[i].__category = category;
-                    await saveOrUpdate(rs[i], type);
                 }
+                await saveOrUpdate(rs, type, country);
                 // 如果是isOnlyNew,需要更新集合
                 if(isOnlyNew) {
                     await saveOrUpdateCollection(type, collection, rs.map(item => item.appId))
@@ -74,7 +74,7 @@ export async function run(type, isOnlyNew = false) {
     async function taskPool(tasks) {
         return new Promise((resolve) => {
             const poool = [];
-            const maxTask = 5;
+            const maxTask = 10;
 
             function addTask() {
                 if (tasks.length && poool.length < maxTask) {
