@@ -1,13 +1,18 @@
 import Log from "../utils/Log.js";
 import { createDir } from "../utils/index.js";
-import { saveOrUpdate } from "../data-source.js";
+import { saveOrUpdate, saveOrUpdateCollection } from "../data-source.js";
 import { osTypeEnum, country } from "../const.js";
 import fs from "fs/promises";
 import { resolve } from "path";
 import * as Android from './android.js'
 import * as iOS from './ios.js'
 
-export async function run(type) {
+/**
+ * 
+ * @param {*} type 平台类型
+ * @param {*} isOnlyNew 是否只采集最新的列表
+ */
+export async function run(type, isOnlyNew = false) {
 
     const isAndroid = osTypeEnum.android === type;
 
@@ -44,9 +49,14 @@ export async function run(type) {
                     rs[i].__category = category;
                     await saveOrUpdate(rs[i], type);
                 }
+                // 如果是isOnlyNew,需要更新集合
+                if(isOnlyNew) {
+                    await saveOrUpdateCollection(type, collection, rs.map(item => item.appId))
+                }
             }
             Log.info(`${type}, collection: ${collection}, category: ${category}, country: ${country}，已采集${rs.length}条数据`);
         } catch (e) {
+            console.error(e)
             Log.info(`${type}, collection: ${collection}, category: ${category}, country: ${country}，采集出错`);
             await saveFetchData(
                 `error-${country}-${category}-${collection}.log`,
@@ -93,15 +103,27 @@ export async function run(type) {
     const flatTask = []
     // 按国家采集
     for (let i = 0, len = country.length; i < len; i++) {
-        for (let [_key, cateVal] of Object.entries(category)) {
+        // 只采集指定的集合
+        if(isOnlyNew) {
             for (let [_colKey, colVal] of Object.entries(collection)) {
                 flatTask.push({
                     collection: colVal,
-                    category: cateVal,
+                    category: '',
                     country: String(country[i].value).toLocaleLowerCase(),
                 })
             }
+        } else {
+            for (let [_key, cateVal] of Object.entries(category)) {
+                for (let [_colKey, colVal] of Object.entries(collection)) {
+                    flatTask.push({
+                        collection: colVal,
+                        category: cateVal,
+                        country: String(country[i].value).toLocaleLowerCase(),
+                    })
+                }
+            }
         }
+
     }
     await taskPool(flatTask);
 
