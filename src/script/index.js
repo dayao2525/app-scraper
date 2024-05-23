@@ -1,5 +1,5 @@
 import Log from "../utils/Log.js";
-import { createDir } from "../utils/index.js";
+import { createDir, sleep } from "../utils/index.js";
 import { saveOrUpdate, saveOrUpdateCollection } from "../data-source.js";
 import { osTypeEnum, country } from "../const.js";
 import fs from "fs/promises";
@@ -126,7 +126,8 @@ export async function run(type, isOnlyNew = false) {
 
     }
     await taskPool(flatTask);
-
+    // 有时候db还没写完就自信关闭了，这里睡眠1分钟
+    await sleep(60000);
     console.timeEnd(type);
     conosle.log(`${type} done`)
 }

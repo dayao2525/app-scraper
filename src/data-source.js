@@ -66,14 +66,14 @@ export async function saveOrUpdate(item, type) {
 
     if (type === osTypeEnum.ios) {
         entiry.storeId = item.id;
-        entiry.genre = item.genres.join(',')
-        entiry.genreId = item.genreIds.join(',')
+        entiry.genre = (item.genres ?? []).join(',')
+        entiry.genreId = (item.genreIds ?? []).join(',')
         entiry.ipadScreenshots = (item.ipadScreenshots??[]).join(',')
-        entiry.languages = item.languages.join(',')
+        entiry.languages = (item.languages ?? []).join(',')
         entiry.size = String(item.size ?? '');
         entiry.updated = new Date(item.updated).getTime()
         entiry.requiredOsVersion = item.requiredOsVersion || ''
-        entiry.supportedDevices = item.supportedDevices.join(',')
+        entiry.supportedDevices = (item.supportedDevices ?? []).join(',')
     } else {
         entiry.genre = [item.genre].join(',')
         entiry.genreId = [item.genreId].join(',')
