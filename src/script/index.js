@@ -1,5 +1,5 @@
 import Log from "../utils/Log.js";
-import { createDir, sleep } from "../utils/index.js";
+import { createDir } from "../utils/index.js";
 import { saveOrUpdate, saveOrUpdateCollection } from "../data-source.js";
 import { osTypeEnum, country } from "../const.js";
 import fs from "fs/promises";
@@ -32,7 +32,7 @@ export async function run(type, isOnlyNew = false) {
      * @param options IFnListOptions
      */
     async function scraper(options) {
-        const { collection, category, country} = options
+        const { collection, category, country } = options
         try {
             const scraperCall = isAndroid ? Android.scraper : iOS.scraper
             const rs = await scraperCall(options);
@@ -50,7 +50,7 @@ export async function run(type, isOnlyNew = false) {
                 }
                 await saveOrUpdate(rs, type, country);
                 // 如果是isOnlyNew,需要更新集合
-                if(isOnlyNew) {
+                if (isOnlyNew) {
                     await saveOrUpdateCollection(type, collection, rs.map(item => item.appId))
                 }
             }
@@ -84,9 +84,9 @@ export async function run(type, isOnlyNew = false) {
                     const islast = tasks.length === 0
                     scraper(item).finally(() => {
                         poool.pop()
-                        if (islast) {
+                        if (poool.length === 0) {
                             resolve()
-                        } else {
+                        } else if (!islast) {
                             addTask()
                         }
                     })
@@ -104,7 +104,7 @@ export async function run(type, isOnlyNew = false) {
     // 按国家采集
     for (let i = 0, len = country.length; i < len; i++) {
         // 只采集指定的集合
-        if(isOnlyNew) {
+        if (isOnlyNew) {
             for (let [_colKey, colVal] of Object.entries(collection)) {
                 flatTask.push({
                     collection: colVal,
@@ -126,8 +126,6 @@ export async function run(type, isOnlyNew = false) {
 
     }
     await taskPool(flatTask);
-    // 有时候db还没写完就自信关闭了，这里睡眠1分钟
-    await sleep(60000);
     console.timeEnd(type);
     conosle.log(`${type} done`)
 }
