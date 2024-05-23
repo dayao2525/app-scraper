@@ -74,7 +74,7 @@ export async function run(type, isOnlyNew = false) {
     async function taskPool(tasks) {
         return new Promise((resolve) => {
             const poool = [];
-            const maxTask = 10;
+            const maxTask = 5;
 
             function addTask() {
                 if (tasks.length && poool.length < maxTask) {
