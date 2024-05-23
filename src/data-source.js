@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm"
 import "reflect-metadata"
 import { AppEntity } from "./entity/App.js"
+import { CollectionEntity } from "./entity/Collection.js"
 import { osTypeEnum } from "./const.js"
 import dotenv from "dotenv";
 
@@ -14,13 +15,12 @@ const dbConfig = {
     database: process.env.DB_NAME,
 }
 
-
 export const AppDataSource = new DataSource({
     type: "mysql",
     ...dbConfig,
     synchronize: true,
     logging: ["error"],
-    entities: [AppEntity],
+    entities: [AppEntity, CollectionEntity],
     subscribers: [],
     migrations: [],
 })
@@ -68,7 +68,7 @@ export async function saveOrUpdate(item, type) {
         entiry.storeId = item.id;
         entiry.genre = item.genres.join(',')
         entiry.genreId = item.genreIds.join(',')
-        entiry.ipadScreenshots = item.ipadScreenshots.join(',')
+        entiry.ipadScreenshots = (item.ipadScreenshots??[]).join(',')
         entiry.languages = item.languages.join(',')
         entiry.size = String(item.size ?? '');
         entiry.updated = new Date(item.updated).getTime()
@@ -86,4 +86,26 @@ export async function saveOrUpdate(item, type) {
         entiry.storeId = 0
     }
     await repository.save(entiry)
+}
+
+export async function saveOrUpdateCollection(type, collection, ids) {
+    console.log(type,collection, ids.length )
+  // 这里需要传入表名字
+  const repository = AppDataSource.getRepository("collection")
+
+  let entiry = await repository.findOneBy({
+        type,
+        collection
+    })
+
+    if(!entiry) {
+        entiry = {}
+        entiry.type = type
+        entiry.collection = collection
+    }
+    entiry.appIds = ids.join(',')
+    entiry.updateTime = Date.now();
+
+    await repository.save(entiry)
+
 }
