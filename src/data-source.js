@@ -1,7 +1,9 @@
-import { DataSource, getConnection } from "typeorm"
+import { DataSource } from "typeorm"
 import "reflect-metadata"
 import { AppEntity } from "./entity/App.js"
 import { CollectionEntity } from "./entity/Collection.js"
+import { AnchorEntity } from "./entity/Anchor.js"
+import { AnchorVideoEntity } from "./entity/AnchorVideo.js"
 import { osTypeEnum } from "./const.js"
 import dotenv from "dotenv";
 
@@ -20,7 +22,7 @@ export const AppDataSource = new DataSource({
     ...dbConfig,
     synchronize: true,
     logging: ["error"],
-    entities: [AppEntity, CollectionEntity],
+    entities: [AppEntity, CollectionEntity, AnchorEntity, AnchorVideoEntity],
     subscribers: [],
     migrations: [],
 })

@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node ./src/index.js",
-    "top": "node ./src/top.js"
+    "top": "node ./src/top.js",
+    "douyin": "node ./src/douyin.js"
   },
   "keywords": [],
   "author": "",
@@ -16,9 +17,9 @@
     "dotenv": "^16.4.5",
     "google-play-scraper": "^10.0.0",
     "mysql2": "^3.9.7",
+    "puppeteer": "^22.10.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.20"
-  },
-  "devDependencies": {
+    "typeorm": "^0.3.20",
+    "user-agents": "^1.1.217"
   }
 }
