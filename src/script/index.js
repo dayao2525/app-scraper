@@ -74,17 +74,17 @@ export async function run(type, isOnlyNew = false) {
     async function taskPool(tasks) {
         return new Promise((resolve) => {
             const poool = [];
-            const maxTask = 10;
+            const maxTask = 2;
 
             function addTask() {
                 if (tasks.length && poool.length < maxTask) {
                     const item = tasks.pop();
                     poool.push(1);
                     console.log(`${type} 剩余任务数量${tasks.length}, 任务池${poool.length}`)
-                    const islast = tasks.length === 0
                     scraper(item).finally(() => {
+                        const islast = tasks.length === 0
                         poool.pop()
-                        if (poool.length === 0) {
+                        if (poool.length === 0 && islast) {
                             resolve()
                         } else if (!islast) {
                             addTask()
