@@ -8,7 +8,7 @@ export const AppEntity = new EntitySchema({
   uniques: [
     {
         name: 'uuid',
-        columns: ['type', 'appId', 'country']
+        columns: ['type', 'appId']
     }
 ],
   columns: {

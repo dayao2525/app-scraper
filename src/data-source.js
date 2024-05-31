@@ -28,7 +28,7 @@ export const AppDataSource = new DataSource({
     migrations: [],
 })
 
-export async function saveOrUpdate(items, type, country) {
+export async function saveOrUpdate(items, type) {
     const saves = [];
     for (let i = 0, len = items.length; i < len; i++) {
         const item = items[i]
@@ -80,7 +80,7 @@ export async function saveOrUpdate(items, type, country) {
             entiry.ipadScreenshots = ''
             entiry.storeId = 0
         }
-
+        
         saves.push(entiry);
     }
 
@@ -100,6 +100,7 @@ export async function saveOrUpdate(items, type, country) {
                 'price',
                 'free',
                 'currency',
+                'country',
                 'genre',
                 'genreId',
                 'released',

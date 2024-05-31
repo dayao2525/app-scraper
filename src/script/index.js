@@ -48,7 +48,7 @@ export async function run(type, isOnlyNew = false) {
                     rs[i].__collection = collection;
                     rs[i].__category = category;
                 }
-                await saveOrUpdate(rs, type, country);
+                await saveOrUpdate(rs, type);
                 // 如果是isOnlyNew,需要更新集合
                 if (isOnlyNew) {
                     await saveOrUpdateCollection(type, collection, rs.map(item => item.appId))
