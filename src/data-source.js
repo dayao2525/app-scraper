@@ -29,6 +29,13 @@ export const AppDataSource = new DataSource({
 })
 
 export async function saveOrUpdate(items, type) {
+    const repository = AppDataSource.getRepository("app")
+
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect();
+    // 开始事务：
+    await queryRunner.startTransaction();
+
     const saves = [];
     for (let i = 0, len = items.length; i < len; i++) {
         const item = items[i]
@@ -80,13 +87,12 @@ export async function saveOrUpdate(items, type) {
             entiry.ipadScreenshots = ''
             entiry.storeId = 0
         }
-        
+
         saves.push(entiry);
     }
 
-
     try {
-        await AppDataSource.getRepository('app').createQueryBuilder('app')
+        await repository.createQueryBuilder('app')
             .insert()
             .into('app')
             .values(saves)
@@ -124,29 +130,51 @@ export async function saveOrUpdate(items, type) {
                 'raw'
             ], ['uuid'])
             .execute()
-
+        // 提交事务：
+        await queryRunner.commitTransaction();
     } catch (err) {
+        // 有错误做出回滚更改
         console.error(err)
+        await queryRunner.rollbackTransaction();
+    } finally {
+        // you need to release query runner which is manually created:
+        await queryRunner.release()
     }
+
 }
 
+
+
 export async function saveOrUpdateCollection(type, collection, ids) {
-    // 这里需要传入表名字
     const repository = AppDataSource.getRepository("collection")
 
-    let entiry = await repository.findOneBy({
-        type,
-        collection
-    })
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect();
+    // 开始事务：
+    await queryRunner.startTransaction();
 
-    if (!entiry) {
-        entiry = {}
-        entiry.type = type
-        entiry.collection = collection
+    try {
+        let entiry = await repository.findOneBy({
+            type,
+            collection
+        })
+
+        if (!entiry) {
+            entiry = {}
+            entiry.type = type
+            entiry.collection = collection
+        }
+        entiry.appIds = ids.join(',')
+        entiry.updateTime = Date.now();
+
+        await repository.save(entiry)
+        await queryRunner.commitTransaction();
+    } catch (err) {
+        // 有错误做出回滚更改
+        console.error(err)
+        await queryRunner.rollbackTransaction();
+    } finally {
+        // you need to release query runner which is manually created:
+        await queryRunner.release()
     }
-    entiry.appIds = ids.join(',')
-    entiry.updateTime = Date.now();
-
-    await repository.save(entiry)
-
 }
