@@ -58,8 +58,12 @@ import gplay from "google-play-scraper";
 //   }
 
 export const category = gplay.category;
-export const collection = gplay.collection;
-
+// export const collection = gplay.collection;
+export const collection = {
+  TOP_FREE: 'TOP_FREE',
+  TOP_PAID: 'TOP_PAID',
+  GROSSING: 'GROSSING',
+}
 
 /**
  * 采集分类app

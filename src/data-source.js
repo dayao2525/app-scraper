@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm"
 import "reflect-metadata"
 import { AppEntity } from "./entity/App.js"
+import { AppModel } from './model/App.js'
 import { CollectionEntity } from "./entity/Collection.js"
 import { AnchorEntity } from "./entity/Anchor.js"
 import { AnchorVideoEntity } from "./entity/AnchorVideo.js"
@@ -28,31 +29,11 @@ export const AppDataSource = new DataSource({
 })
 
 export async function saveOrUpdate(items, type, country) {
-    // 这里需要传入表名字
-    const repository = AppDataSource.getRepository("app")
-
-    const queryRunner = AppDataSource.createQueryRunner()
-    await queryRunner.connect();
-    // 开始事务：
-    await queryRunner.startTransaction();
-
     const saves = [];
-    const ids = items.map(item => item.appId)
-    const updates = await repository.createQueryBuilder("app", queryRunner)
-        .select(["id", "appId"])
-        .where("appId IN (:...ids)", { ids })
-        .andWhere("type = :type", { type })
-        .andWhere("country = :country", { country })
-        .getRawMany()
-
     for (let i = 0, len = items.length; i < len; i++) {
         const item = items[i]
-        let entiry = updates.find(u => u.appId === item.appId)
-
-        if (!entiry) {
-            entiry = {}
-        }
-
+        const entiry = new AppModel()
+        entiry.id = null
         entiry.type = type
         entiry.appId = item.appId
         entiry.title = item.title || ''
@@ -74,6 +55,8 @@ export async function saveOrUpdate(items, type, country) {
         entiry.country = item.__country
         entiry.collection = item.__collection
         entiry.category = item.__category
+        entiry.ratings = item.ratings ?? 0
+        entiry.histogram = JSON.stringify(item.histogram ?? {})
         entiry.raw = JSON.stringify(item)
 
         if (type === osTypeEnum.ios) {
@@ -97,19 +80,52 @@ export async function saveOrUpdate(items, type, country) {
             entiry.ipadScreenshots = ''
             entiry.storeId = 0
         }
+
         saves.push(entiry);
     }
 
+
     try {
-        await queryRunner.manager.save(saves)
-        // 提交事务：
-        await queryRunner.commitTransaction();
+        await AppDataSource.getRepository('app').createQueryBuilder('app')
+            .insert()
+            .into('app')
+            .values(saves)
+            .orUpdate([
+                'storeId',
+                'title',
+                'description',
+                'icon',
+                'url',
+                'score',
+                'price',
+                'free',
+                'currency',
+                'genre',
+                'genreId',
+                'released',
+                'updated',
+                'version',
+                'reviews',
+                'contentRating',
+                'size',
+                'languages',
+                'requiredOsVersion',
+                'screenshots',
+                'ipadScreenshots',
+                'supportedDevices',
+                'developerId',
+                'developer',
+                'developerWebsite',
+                'collection',
+                'category',
+                'ratings',
+                'histogram',
+                'raw'
+            ], ['uuid'])
+            .execute()
+
     } catch (err) {
-        // 有错误做出回滚更改
-        await queryRunner.rollbackTransaction();
-    } finally {
-        // you need to release query runner which is manually created:
-        await queryRunner.release()
+        console.error(err)
     }
 }
 

@@ -5,6 +5,12 @@ export const AppEntity = new EntitySchema({
   name: "App",
   tableName: "app",
   target: AppModel,
+  uniques: [
+    {
+        name: 'uuid',
+        columns: ['type', 'appId', 'country']
+    }
+],
   columns: {
     id: {
       primary: true,
@@ -83,7 +89,7 @@ export const AppEntity = new EntitySchema({
     reviews: {
       type: "bigint",
       default: 0,
-      comment: "评分人数"
+      comment: "评论人数"
     },
     contentRating: {
       type: "text",
@@ -126,8 +132,9 @@ export const AppEntity = new EntitySchema({
       comment: "开发者网站"
     },
     country: {
-      type: "text",
-      comment: "发行的国家或地区"
+      type: "varchar",
+      comment: "发行的国家或地区",
+      default: ''
     },
     collection: {
       type: "text",
@@ -136,6 +143,15 @@ export const AppEntity = new EntitySchema({
     category: {
       type: "text",
       comment: "采集时的分类"
+    },
+    ratings: {
+      type: "bigint",
+      default: 0,
+      comment: "评分人数"
+    },
+    histogram: {
+      type: "text",
+      comment: "评分各分数数量统计"
     },
     raw: {
       type: "text",

@@ -31,6 +31,8 @@ export class AppModel {
         country,
         collection,
         category,
+        ratings,
+        histogram,
         raw
     ) {
         this.id = id
@@ -95,5 +97,7 @@ export class AppModel {
         this.collection = collection
         // 采集时的分类
         this.category = category
+        this.histogram = histogram
+        this.ratings = ratings
     }
 }

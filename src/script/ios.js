@@ -75,15 +75,15 @@ export const category = {
 };
 
 export const collection = {
-  NEW_IOS: "newapplications",
-  NEW_FREE_IOS: "newfreeapplications",
-  NEW_PAID_IOS: "newpaidapplications",
   TOP_FREE_IOS: "topfreeapplications",
   TOP_FREE_IPAD: "topfreeipadapplications",
   TOP_GROSSING_IOS: "topgrossingapplications",
   TOP_GROSSING_IPAD: "topgrossingipadapplications",
   TOP_PAID_IOS: "toppaidapplications",
   TOP_PAID_IPAD: "toppaidipadapplications",
+  NEW_IOS: "newapplications",
+  NEW_FREE_IOS: "newfreeapplications",
+  NEW_PAID_IOS: "newpaidapplications",
 };
 
 
@@ -98,7 +98,7 @@ export async function scraper(options) {
     country = "us",
   } = options ?? {};
 
-  return await store.list({
+  const apps = await store.list({
     collection,
     category,
     country,
@@ -107,5 +107,13 @@ export async function scraper(options) {
     throttle: 10,
   });
 
+  const ratingPromise = await Promise.allSettled(apps.map(app => store.ratings({
+    id: app.id,
+    country
+  })))
+  return apps.map((app, i) => ({
+    ...app,
+    ...ratingPromise[i].value,
+  }))
 }
 
