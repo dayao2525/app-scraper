@@ -20,6 +20,6 @@ npm start
 ```
 pm2 start ecosystem.config.cjs
 # 单独跑指定任务
-pm2 start ecosystem.config.cjs -- only app-top-scraper
-pm2 start ecosystem.config.cjs -- only “app-top-scraper,app-douyin-scraper”
+pm2 start ecosystem.config.cjs --only app-top-scraper
+pm2 start ecosystem.config.cjs --only “app-top-scraper,app-douyin-scraper”
 ```
