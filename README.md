@@ -15,3 +15,11 @@ npm start
 
 ### 注意
 需要项目目录的`data`目录写权限，用于产生日志文件
+
+### pm2
+```
+pm2 start ecosystem.config.cjs
+# 单独跑指定任务
+pm2 start ecosystem.config.cjs -- only app-top-scraper
+pm2 start ecosystem.config.cjs -- only “app-top-scraper,app-douyin-scraper”
+```
