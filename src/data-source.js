@@ -22,20 +22,36 @@ export const AppDataSource = new DataSource({
     type: "mysql",
     ...dbConfig,
     synchronize: true,
-    logging: ["error"],
+    logging: ['error'],
+    logger: 'file',
     entities: [AppEntity, CollectionEntity, AnchorEntity, AnchorVideoEntity],
     subscribers: [],
     migrations: [],
 })
 
+class TransactionQueue {
+    pending = false
+    queue = []
+    async excute(event) {
+        this.queue.push(event)
+        if (this.pending) {
+            return this.excute()
+        } else {
+            this.pending = true;
+            const event = this.queue.shift()
+            await event();
+            if (this.queue.length) {
+                return this.excute()
+            }
+            this.pending = false;
+            return true;
+        }
+    }
+}
+
+const TranQueue = new TransactionQueue();
+
 export async function saveOrUpdate(items, type) {
-    const repository = AppDataSource.getRepository("app")
-
-    const queryRunner = AppDataSource.createQueryRunner()
-    await queryRunner.connect();
-    // 开始事务：
-    await queryRunner.startTransaction();
-
     const saves = [];
     for (let i = 0, len = items.length; i < len; i++) {
         const item = items[i]
@@ -64,7 +80,7 @@ export async function saveOrUpdate(items, type) {
         entiry.category = item.__category
         entiry.ratings = item.ratings ?? 0
         entiry.histogram = JSON.stringify(item.histogram ?? {})
-        entiry.raw = JSON.stringify(item)
+        entiry.raw = ''//JSON.stringify(item)
 
         if (type === osTypeEnum.ios) {
             entiry.storeId = item.id;
@@ -91,45 +107,99 @@ export async function saveOrUpdate(items, type) {
         saves.push(entiry);
     }
 
+    await AppDataSource.getRepository("app").createQueryBuilder('app')
+        // .setLock("pessimistic_write")
+        .insert()
+        .into('app')
+        .values(saves)
+        .orUpdate([
+            'storeId',
+            'title',
+            'description',
+            'icon',
+            'url',
+            'score',
+            'price',
+            'free',
+            'currency',
+            'country',
+            'genre',
+            'genreId',
+            'released',
+            'updated',
+            'version',
+            'reviews',
+            'contentRating',
+            'size',
+            'languages',
+            'requiredOsVersion',
+            'screenshots',
+            'ipadScreenshots',
+            'supportedDevices',
+            'developerId',
+            'developer',
+            'developerWebsite',
+            'collection',
+            'category',
+            'ratings',
+            'histogram',
+            'raw'
+        ], ['uuid'])
+        .execute()
+
+}
+
+export async function saveOrUpdateCollection(type, collection, ids) {
+
+    const repository = AppDataSource.getRepository("collection")
+    let entiry = await repository.findOneBy({
+        type,
+        collection
+    })
+
+    if (!entiry) {
+        entiry = {}
+        entiry.type = type
+        entiry.collection = collection
+    }
+    entiry.appIds = ids.join(',')
+    entiry.updateTime = Date.now();
+
+    await repository.save(entiry)
+}
+
+export async function saveExcute(event) {
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect();
+    // 开始事务：
+    await queryRunner.startTransaction();
+
     try {
-        await repository.createQueryBuilder('app')
-            .insert()
-            .into('app')
-            .values(saves)
-            .orUpdate([
-                'storeId',
-                'title',
-                'description',
-                'icon',
-                'url',
-                'score',
-                'price',
-                'free',
-                'currency',
-                'country',
-                'genre',
-                'genreId',
-                'released',
-                'updated',
-                'version',
-                'reviews',
-                'contentRating',
-                'size',
-                'languages',
-                'requiredOsVersion',
-                'screenshots',
-                'ipadScreenshots',
-                'supportedDevices',
-                'developerId',
-                'developer',
-                'developerWebsite',
-                'collection',
-                'category',
-                'ratings',
-                'histogram',
-                'raw'
-            ], ['uuid'])
-            .execute()
+        await event();
+        // 提交事务：
+        await queryRunner.commitTransaction();
+    } catch (err) {
+        // 有错误做出回滚更改
+        console.error(err)
+        await queryRunner.rollbackTransaction();
+    } finally {
+        // you need to release query runner which is manually created:
+        await queryRunner.release()
+    }
+}
+
+export async function saveOrUpdateApp(type, collection, list, isOnlyNew = false) {
+    const queryRunner = AppDataSource.createQueryRunner()
+    await queryRunner.connect();
+    // 开始事务：
+    await queryRunner.startTransaction();
+
+    try {
+        await saveOrUpdate(list, type);
+        // 如果是isOnlyNew,需要更新集合
+        if (isOnlyNew) {
+            await saveOrUpdateCollection(type, collection, list.map(item => item.appId))
+        }
         // 提交事务：
         await queryRunner.commitTransaction();
     } catch (err) {
@@ -141,40 +211,4 @@ export async function saveOrUpdate(items, type) {
         await queryRunner.release()
     }
 
-}
-
-
-
-export async function saveOrUpdateCollection(type, collection, ids) {
-    const repository = AppDataSource.getRepository("collection")
-
-    const queryRunner = AppDataSource.createQueryRunner()
-    await queryRunner.connect();
-    // 开始事务：
-    await queryRunner.startTransaction();
-
-    try {
-        let entiry = await repository.findOneBy({
-            type,
-            collection
-        })
-
-        if (!entiry) {
-            entiry = {}
-            entiry.type = type
-            entiry.collection = collection
-        }
-        entiry.appIds = ids.join(',')
-        entiry.updateTime = Date.now();
-
-        await repository.save(entiry)
-        await queryRunner.commitTransaction();
-    } catch (err) {
-        // 有错误做出回滚更改
-        console.error(err)
-        await queryRunner.rollbackTransaction();
-    } finally {
-        // you need to release query runner which is manually created:
-        await queryRunner.release()
-    }
 }

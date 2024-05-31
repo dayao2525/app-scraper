@@ -1,6 +1,6 @@
 import Log from "../utils/Log.js";
-import { createDir } from "../utils/index.js";
-import { saveOrUpdate, saveOrUpdateCollection } from "../data-source.js";
+import { createDir, sleep } from "../utils/index.js";
+import { saveOrUpdate, saveOrUpdateCollection, saveOrUpdateApp, saveExcute } from "../data-source.js";
 import { osTypeEnum, country } from "../const.js";
 import fs from "fs/promises";
 import { resolve } from "path";
@@ -48,6 +48,7 @@ export async function run(type, isOnlyNew = false) {
                     rs[i].__collection = collection;
                     rs[i].__category = category;
                 }
+                // await saveOrUpdateApp(type, collection, rs, isOnlyNew)
                 await saveOrUpdate(rs, type);
                 // 如果是isOnlyNew,需要更新集合
                 if (isOnlyNew) {
@@ -81,10 +82,11 @@ export async function run(type, isOnlyNew = false) {
                     const item = tasks.pop();
                     poool.push(1);
                     console.log(`${type} 剩余任务数量${tasks.length}, 任务池${poool.length}`)
-                    const islast = tasks.length === 0
                     scraper(item).finally(() => {
+                        const islast = tasks.length === 0
                         poool.pop()
-                        if (poool.length === 0) {
+                        console.log('done',poool.length, poool.length === 0, islast, tasks.length === 0)
+                        if (poool.length === 0 &&  islast) {
                             resolve()
                         } else if (!islast) {
                             addTask()
@@ -125,7 +127,10 @@ export async function run(type, isOnlyNew = false) {
         }
 
     }
-    await taskPool(flatTask);
+
+    await saveExcute(async () => {
+        await taskPool(flatTask);
+    })
     console.timeEnd(type);
     conosle.log(`${type} done`)
 }
