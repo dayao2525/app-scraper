@@ -1,3 +1,4 @@
+import { sleep } from './index.js'
 
  class Lookup {
     pending = false
