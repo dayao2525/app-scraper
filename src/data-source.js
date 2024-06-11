@@ -22,7 +22,7 @@ const dbConfig = {
 export const AppDataSource = new DataSource({
   type: "mysql",
   ...dbConfig,
-  synchronize: true,
+  synchronize: false,
   logging: ["error"],
   entities: [AppEntity, CollectionEntity, AnchorEntity, AnchorVideoEntity],
   subscribers: [],
@@ -94,6 +94,9 @@ export async function saveOrUpdate(items, type) {
           entiry.updated = new Date(item.updated).getTime();
           entiry.requiredOsVersion = item.requiredOsVersion || "";
           entiry.supportedDevices = (item.supportedDevices ?? []).join(",");
+          // 添加封面图
+          // ios封面图就是icon字段去除最有一段/后面的内容，然后后面凭借/1200x630wa.png
+          entiry.headerImage = item.icon.slice(0, item.icon.lastIndexOf('/')).concat('/1200x630wa.png')
         } else {
           entiry.genre = [item.genre].join(",");
           entiry.genreId = [item.genreId].join(",");
@@ -104,6 +107,7 @@ export async function saveOrUpdate(items, type) {
           entiry.languages = "";
           entiry.ipadScreenshots = "";
           entiry.storeId = 0;
+          entiry.headerImage = item.headerImage
         }
 
         saves.push(entiry);
@@ -146,6 +150,7 @@ export async function saveOrUpdate(items, type) {
             "category",
             "ratings",
             "histogram",
+            "headerImage",
             "raw",
           ],
           ["uuid"]

@@ -153,6 +153,10 @@ export const AppEntity = new EntitySchema({
       type: "text",
       comment: "评分各分数数量统计"
     },
+    headerImage: {
+      type: "text",
+      comment: "封面图路径",
+    },
     raw: {
       type: "text",
       comment: "采集时的原始json数据"

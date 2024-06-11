@@ -51,7 +51,11 @@ export async function run(type, isOnlyNew = false) {
                 await saveOrUpdate(rs, type);
                 // 如果是isOnlyNew,需要更新集合
                 if (isOnlyNew) {
-                    await saveOrUpdateCollection(type, collection, rs.map(item => item.appId))
+                    let saveColectionName = collection;
+                    if(category) {
+                        saveColectionName += '_game'
+                    }
+                    await saveOrUpdateCollection(type, saveColectionName, rs.map(item => item.appId))
                 }
             }
             Log.info(`${type}, collection: ${collection}, category: ${category}, country: ${country}，已采集${rs.length}条数据`);
@@ -111,7 +115,14 @@ export async function run(type, isOnlyNew = false) {
                     category: '',
                     country: String(country[i].value).toLocaleLowerCase(),
                 })
+                // game
+                flatTask.push({
+                    collection: colVal,
+                    category: isAndroid ? category.GAME : category.GAMES,
+                    country: String(country[i].value).toLocaleLowerCase(),
+                })
             }
+
         } else {
             for (let [_key, cateVal] of Object.entries(category)) {
                 for (let [_colKey, colVal] of Object.entries(collection)) {

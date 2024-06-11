@@ -34,7 +34,15 @@ AppDataSource.initialize()
         await repository.save(user);
       }
     }
-    const users = await repository.find();
+
+    // 采集抖音的用户
+    const users = await repository.find({
+      where: {
+        type: 'douyin'
+      }
+    });
+
+  
     const result = await run(users);
     await saveOrUpdate(result);
     

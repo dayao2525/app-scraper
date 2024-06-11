@@ -33,6 +33,7 @@ export class AppModel {
         category,
         ratings,
         histogram,
+        headerImage,
         raw
     ) {
         this.id = id
@@ -99,5 +100,6 @@ export class AppModel {
         this.category = category
         this.histogram = histogram
         this.ratings = ratings
+        this.headerImage = headerImage
     }
 }
