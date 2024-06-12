@@ -5,7 +5,8 @@ export class AnchorVideoModel {
         title,
         create_time,
         comment_count,
-        digg_count
+        digg_count,
+        aweme_id
     ) {
         this.id = id
         this.uid = uid
@@ -13,5 +14,6 @@ export class AnchorVideoModel {
         this.create_time = create_time
         this.comment_count = comment_count
         this.digg_count = digg_count
+        this.aweme_id = aweme_id
     }
 }

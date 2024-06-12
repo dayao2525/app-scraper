@@ -41,5 +41,10 @@ export const AnchorVideoEntity = new EntitySchema({
             comment: "点赞数量",
             default: 0,
         },
+        aweme_id: {
+            type: 'varchar',
+            comment: '视频唯一id',
+            default: ''
+        }
     },
 });

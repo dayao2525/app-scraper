@@ -75,6 +75,7 @@ export async function run(users) {
                   list.forEach((item) => {
                     result.push({
                       uid: user.id,
+                      aweme_id: `douyin-${item.aweme_id}`,
                       create_time: item.create_time,
                       title: item.preview_title,
                       comment_count: item.statistics.comment_count,
