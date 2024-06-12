@@ -27,6 +27,7 @@ export async function run(users) {
           width: 1920,
           height: 800,
         },
+        args: ['--proxy-server=39.108.224.245:1080'],
       });
       const page = await browser.newPage();
 
