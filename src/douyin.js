@@ -103,7 +103,7 @@ AppDataSource.initialize()
     .values(saves)
     .orUpdate(
       ['title', 'create_time', 'comment_count', 'digg_count', 'aweme_id'],
-      ["uid-title"]
+      ["aweme_id"]
     )
     .execute();
     
