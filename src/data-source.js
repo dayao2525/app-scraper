@@ -76,10 +76,10 @@ export async function saveOrUpdate(items, type) {
         entiry.developerId = item.developerId || "";
         entiry.developer = item.developer || "";
         entiry.reviews = item.reviews ?? 0;
-        entiry.released = item.released ?? "";
+        entiry.released = parseInt((new Date(item.released).getTime() ?? 0)/1000);
         entiry.country = item.__country;
         entiry.collection = item.__collection;
-        entiry.category = item.__category;
+        entiry.category = item.__category || '';
         entiry.ratings = item.ratings ?? 0;
         entiry.histogram = JSON.stringify(item.histogram ?? {});
         entiry.raw = JSON.stringify(item);
@@ -107,7 +107,7 @@ export async function saveOrUpdate(items, type) {
           entiry.languages = "";
           entiry.ipadScreenshots = "";
           entiry.storeId = 0;
-          entiry.headerImage = item.headerImage
+          entiry.headerImage = item.headerImage || ''
         }
 
         saves.push(entiry);
