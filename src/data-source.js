@@ -122,7 +122,7 @@ export async function saveOrUpdate(items, type) {
           [
             "storeId",
             "title",
-            "description",
+            // "description",
             "icon",
             "url",
             "score",
