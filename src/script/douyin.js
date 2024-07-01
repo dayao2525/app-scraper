@@ -180,12 +180,12 @@ export async function run(users) {
   }
 
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: {
       width: 1920,
       height: 800,
     },
-    // args: ['--proxy-server=39.108.224.245:1080'],
+    args: ['--proxy-server=39.108.224.245:1080'],
   });
 
   for (let i = 0, len = users.length; i < len; i++) {

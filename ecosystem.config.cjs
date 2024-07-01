@@ -27,7 +27,7 @@ module.exports = {
     name: "app-douyin-scraper",
     script: "./src/douyin.js",
     instances: 1,
-    cron_restart: '*/1 * * * *',
+    cron_restart: '*/3 * * * *',
     env: {
       "NODE_ENV": "production"
     },
