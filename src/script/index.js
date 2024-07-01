@@ -38,10 +38,10 @@ export async function run(type, isOnlyNew = false) {
             const rs = await scraperCall(options);
 
             if (rs && rs.length) {
-                await saveFetchData(
-                    `${country}-${category}-${collection}.json`,
-                    JSON.stringify(rs, null, 4)
-                );
+                // await saveFetchData(
+                //     `${country}-${category}-${collection}.json`,
+                //     JSON.stringify(rs, null, 4)
+                // );
                 for (let i = 0, len = rs.length; i < len; i++) {
                     // 扩展国家字段，用于入库
                     rs[i].__country = country;

@@ -65,7 +65,7 @@ export async function run(users) {
 
               if (response.ok()) {
                 const json = text;
-                await saveFetchData(`${count}.json`, text, SAVE_PATH);
+                // await saveFetchData(`${count}.json`, text, SAVE_PATH);
 
                 if (json) {
                   const response = JSON.parse(json);
@@ -136,6 +136,6 @@ export async function run(users) {
     const [_result, browser] = await scraper(users[i]);
     await browser.close();
   }
-  await saveFetchData("done.json", JSON.stringify(result, null, 4));
+  // await saveFetchData("done.json", JSON.stringify(result, null, 4));
   return result;
 }
